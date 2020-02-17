@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+camunda.bpm:
+  admin-user:
+    id: demo
+    password: demo
+    firstName: demo
+  filter:
+    create: All tasks
+
+keycloak:
+  server-url: http://keycloak:8080/auth
+  realm: master
+  username: admin
+  password: admin
+  client-id: admin-cli
+
+logging:
+  level:
+    com:
+      example:
+        processregistration: DEBUG

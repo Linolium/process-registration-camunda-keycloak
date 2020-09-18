@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import javax.ws.rs.core.Response;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Реализация сервиса регистрации
@@ -25,11 +27,12 @@ public class RegistrationServiceImpl implements RegistrationService {
     private UsersResource usersResource;
 
     @Override
-    public String createUser(RegistrationData data) {
+    public String createUser(RegistrationData data, String processInstanceId) {
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(false); // подтверждение выполняется в ручную
         user.setUsername(data.getUsername());
         user.setEmail(data.getEmail());
+        user.setAttributes(Collections.singletonMap("processInstanceId", Collections.singletonList(processInstanceId)));
 
         Response response = usersResource.create(user);
 
@@ -51,6 +54,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     public void enableUser(String userId) {
         UserResource userResource = usersResource.get(userId);
         UserRepresentation representation = userResource.toRepresentation();
+        representation.setAttributes(new HashMap<>());
         representation.setEnabled(true);
 
         userResource.update(representation);
@@ -63,5 +67,15 @@ public class RegistrationServiceImpl implements RegistrationService {
         representation.setAttributes(Collections.singletonMap("comments", Collections.singletonList("declined")));
 
         userResource.update(representation);
+    }
+
+    @Override
+    public boolean isUserExists(String username, String email) {
+        List<UserRepresentation> users = usersResource.list();
+        UserRepresentation user = users.stream()
+                .filter(u -> username.equals(u.getUsername()) || email.equals(u.getEmail()))
+                .findAny()
+                .orElse(null);
+        return user != null;
     }
 }

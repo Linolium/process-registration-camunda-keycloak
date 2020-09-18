@@ -39,8 +39,15 @@ public class RegistrationTask implements JavaDelegate {
             throw new BpmnError("NO_DATA");
         }
 
-        String userId = registrationService.createUser(data);
+        if (registrationService.isUserExists(data.getUsername(), data.getEmail())) {
+            logger.error("====== USERNAME OR EMAIL ALREADY EXISTS =====");
+            throw new BpmnError("USER_OR_EMAIL_ALREADY_EXISTS");
+        }
+
+        String userId = registrationService.createUser(data, execution.getProcessInstanceId());
         execution.setVariable("userId", userId);
+        execution.setVariable("username", data.getUsername());
+        execution.setVariable("email", data.getEmail());
     }
 
 }
